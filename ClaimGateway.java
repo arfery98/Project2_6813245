@@ -1,8 +1,13 @@
-package Project2_6813245;
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package project2;
 
 /**
- * ClaimGateway
+ *
+ * @author TG-Asus-F16
  */
 public class ClaimGateway {
-
+    
 }
