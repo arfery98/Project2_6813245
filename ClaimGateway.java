@@ -112,7 +112,7 @@ public class ClaimGateway {
         return this.pendingClaims;
     }
 
-    /**
+    /*
      * Thread-safe method to deduct approved claims from the gateway.
      * Used by AssessorThread during claim processing.
      * @return The actual amount of claims removed.
