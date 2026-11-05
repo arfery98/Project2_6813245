@@ -1,6 +1,7 @@
 // 6813110 Pattavee Nimkulrat
 // 6813113 Rachata Charoenboophon
 // 6813245 Thanaporn Songthong
+// 6813246 Premprecha Pliensuwan
 // 6813257 Sarochphan Nikrothanonda
 package Project2_6813245;
 
