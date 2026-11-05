@@ -4,6 +4,7 @@
 // 6813257 Sarochphan Nikrothanonda
 package Project2_6813245;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
@@ -54,29 +55,29 @@ public class BrokerThread extends Thread {
     public void run() {
 
         for (int day = 1; day <= days; day++) {
-            // TODO: wait for the coordinator's start-of-day signal.
-            ClaimGateway gateway = claimGateways.get(ThreadLocalRandom.current().nextInt(claimGateways.size()));
-
-            int newClaims = ThreadLocalRandom.current().nextInt(minDailyClaims, maxDailyClaims + 1);
-
-            String threadName = Thread.currentThread().getName();
-
-            System.out.printf("%s >> Day %d new claims = %d%n",
-                    threadName, day, newClaims);
-
-            int remainingClaims = newClaims;
-            while (remainingClaims > 0) {
-                int batchClaims = Math.min(remainingClaims, batchSize);
-
-                // TODO: submit batchClaims to the selected ClaimGateway.
-                System.out.printf("%s >> prepared batch = %d%n", threadName, batchClaims);
-                remainingClaims -= batchClaims;
-
-            }
-
-            // TODO: signal completion and wait for the next phase/day.
             try {
-                phaseBarrier.await();
+                phaseBarrier.await(); // Main has printed the day and reset tokens.
+                int newClaims = (int) ThreadLocalRandom.current()
+                        .nextLong(minDailyClaims, (long) maxDailyClaims + 1);
+                String threadName = Thread.currentThread().getName();
+                List<Integer> batches = new ArrayList<>();
+                for (int remaining = newClaims; remaining > 0;) {
+                    int batch = Math.min(remaining, batchSize);
+                    batches.add(batch);
+                    remaining -= batch;
+                }
+                System.out.printf("%s >> Day %d new claims = %d; split to %s%n",
+                        threadName, day, newClaims, batches);
+                ClaimGateway gateway = claimGateways.get(ThreadLocalRandom.current().nextInt(claimGateways.size()));
+                for (int batchClaims : batches) {
+                    synchronized (gateway) {
+                        int pending = gateway.addClaims(batchClaims);
+                        System.out.printf("%s >> submit %d claims to %s; pending claims = %d%n",
+                                threadName, batchClaims, gateway.getName(), pending);
+                    }
+                }
+                phaseBarrier.await(); // All brokers finished; assessors may work.
+                phaseBarrier.await(); // All assessors finished; next day may start.
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return;
@@ -86,3 +87,4 @@ public class BrokerThread extends Thread {
         }
     }
 }
+
