@@ -1,7 +1,6 @@
 // 6813110 Pattavee Nimkulrat
 // 6813113 Rachata Charoenboophon
 // 6813245 Thanaporn Songthong
-// 6813246 Premprecha Pliensuwan
 // 6813257 Sarochphan Nikrothanonda
 package Project2_6813245;
 
@@ -19,12 +18,12 @@ public class Main {
             ClaimGateway.readConfig(keyboard, args.length == 0 ? "config.txt" : args[0]);
             runSimulation();
         } catch (IllegalArgumentException | IllegalStateException e) {
-            System.err.printf("%s >> Simulation failed: %s%n",
+            System.err.printf("%18s >> Simulation failed: %s%n",
                     Thread.currentThread().getName(), e.getMessage());
             System.exit(1);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            System.err.printf("%s >> Simulation interrupted%n", Thread.currentThread().getName());
+            System.err.printf("%18s >> Simulation interrupted%n", Thread.currentThread().getName());
             System.exit(1);
         }
     }
@@ -74,18 +73,20 @@ public class Main {
                 worker.start();
             }
             for (int day = 1; day <= ClaimGateway.days; day++) {
-                log("==================================================");
+                log("-------------------------------------------------------------------------------");
                 log("Day " + day);
                 for (ClaimGateway gateway : claims) {
-                    log(gateway.getName() + " pending claims = " + gateway.getPendingClaims());
+                    log(String.format("%-16s pending claims = %4d", gateway.getName(), gateway.getPendingClaims()));
                 }
                 for (PaymentGateway gateway : payments) {
                     gateway.resetTokens();
-                    log("reset " + gateway.getName() + " tokens = " + gateway.getRemainingTokens());
+                    log(String.format("reset %-16s tokens = %4d", gateway.getName(), gateway.getRemainingTokens()));
                 }
+                log("");
                 phases.await(); // Release all workers after the daily header.
                 phases.await(); // Wait for every broker to finish submitting.
                 phases.await(); // Wait for every assessor to finish payment work.
+                log("");
             }
             for (Thread worker : workers) {
                 worker.join();
@@ -100,7 +101,8 @@ public class Main {
         } finally {
             // Interrupt first, then join all workers, even when Main is interrupted.
             for (Thread worker : workers) {
-                if (worker.isAlive()) worker.interrupt();
+                if (worker.isAlive())
+                    worker.interrupt();
             }
             boolean interrupted = Thread.interrupted();
             for (Thread worker : workers) {
@@ -112,17 +114,18 @@ public class Main {
                     }
                 }
             }
-            if (interrupted) Thread.currentThread().interrupt();
+            if (interrupted)
+                Thread.currentThread().interrupt();
         }
         if (failure.get() != null) {
             throw new IllegalStateException("A worker failed", failure.get());
         }
         assessors.sort(Comparator.comparingLong(AssessorThread::getSuccessfulPayments)
                 .reversed().thenComparing(AssessorThread::getName));
-        log("==================================================");
+        log("-------------------------------------------------------------------------------");
         log("Summary");
         for (AssessorThread assessor : assessors) {
-            log(assessor.getName() + " successful payments = " + assessor.getSuccessfulPayments());
+            log(String.format("%-18s successful payments = %4d", assessor.getName(), assessor.getSuccessfulPayments()));
         }
     }
 
@@ -140,26 +143,31 @@ public class Main {
     private static void printParameters(List<ClaimGateway> claims, List<PaymentGateway> payments,
             List<BrokerThread> brokers, List<AssessorThread> assessors) {
         log("Parameters");
-        log("Days of simulation = " + ClaimGateway.days);
+        log(String.format("%-20s : %d", "Days of simulation", ClaimGateway.days));
         List<String> names = new ArrayList<>();
-        for (ClaimGateway gateway : claims) names.add(gateway.getName());
-        log("ClaimGateways = " + names);
-        log("Batch size = " + ClaimGateway.batchSize);
+        for (ClaimGateway gateway : claims)
+            names.add(gateway.getName());
+        log(String.format("%-20s : %s", "ClaimGateways", names));
+        log(String.format("%-20s : %d", "Batch size", ClaimGateway.batchSize));
         names.clear();
-        for (PaymentGateway gateway : payments) names.add(gateway.getName());
-        log("PaymentGateways = " + names);
-        log("Daily tokens = " + ClaimGateway.dailyTokens);
+        for (PaymentGateway gateway : payments)
+            names.add(gateway.getName());
+        log(String.format("%-20s : %s", "PaymentGateways", names));
+        log(String.format("%-20s : %d", "Daily tokens", ClaimGateway.dailyTokens));
         names.clear();
-        for (Thread broker : brokers) names.add(broker.getName());
-        log("BrokerThreads = " + names);
-        log("Daily claims: min = " + ClaimGateway.minDailyClaims + ", max = " + ClaimGateway.maxDailyClaims);
+        for (Thread broker : brokers)
+            names.add(broker.getName());
+        log(String.format("%-20s : %s", "BrokerThreads", names));
+        log(String.format("%-20s : min = %d, max = %d",
+                "Daily claims", ClaimGateway.minDailyClaims, ClaimGateway.maxDailyClaims));
         names.clear();
-        for (Thread assessor : assessors) names.add(assessor.getName());
-        log("AssessorThreads = " + names);
-        log("Daily capacity = " + ClaimGateway.dailyCapacity);
+        for (Thread assessor : assessors)
+            names.add(assessor.getName());
+        log(String.format("%-20s : %s", "AssessorThreads", names));
+        log(String.format("%-20s : %d", "Daily capacity", ClaimGateway.dailyCapacity));
     }
 
     private static void log(String message) {
-        System.out.printf("%s >> %s%n", Thread.currentThread().getName(), message);
+        System.out.printf("%18s >> %s%n", Thread.currentThread().getName(), message);
     }
 }

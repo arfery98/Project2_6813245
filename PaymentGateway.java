@@ -1,7 +1,6 @@
 // 6813110 Pattavee Nimkulrat
 // 6813113 Rachata Charoenboophon
 // 6813245 Thanaporn Songthong
-// 6813246 Premprecha Pliensuwan
 // 6813257 Sarochphan Nikrothanonda
 package Project2_6813245;
 
@@ -27,34 +26,17 @@ public final class PaymentGateway {
         return remainingTokens;
     }
 
-    public synchronized void resetDailyTokens() {
+    public synchronized void resetTokens() {
         remainingTokens = dailyTokens;
     }
 
-    public synchronized PaymentResult issuePayments(int pendingPayments) {
-        if (pendingPayments < 0) {
+    public synchronized int issuePayments(long requested) {
+        if (requested < 0) {
             throw new IllegalArgumentException("Pending payments cannot be negative");
         }
-        int paid = Math.min(pendingPayments, remainingTokens);
+
+        int paid = (int) Math.min(requested, remainingTokens);
         remainingTokens -= paid;
-        return new PaymentResult(paid, remainingTokens);
-    }
-
-    public static final class PaymentResult {
-        private final int paid;
-        private final int remainingTokens;
-
-        private PaymentResult(int paid, int remainingTokens) {
-            this.paid = paid;
-            this.remainingTokens = remainingTokens;
-        }
-
-        public int getPaid() {
-            return paid;
-        }
-
-        public int getRemainingTokens() {
-            return remainingTokens;
-        }
+        return paid;
     }
 }

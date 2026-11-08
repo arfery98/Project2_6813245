@@ -1,7 +1,6 @@
 // 6813110 Pattavee Nimkulrat
 // 6813113 Rachata Charoenboophon
 // 6813245 Thanaporn Songthong
-// 6813246 Premprecha Pliensuwan
 // 6813257 Sarochphan Nikrothanonda
 package Project2_6813245;
 
@@ -38,9 +37,9 @@ public class ClaimGateway {
 
         // Prompt user for a new file name repeatedly if missing to prevent program crash
         while (!file.isFile()) {
-            System.out.printf("%s >> %s%n", Thread.currentThread().getName(),
-                    new FileNotFoundException(file.getPath()));
-            System.out.printf("%s >> New file name = ", Thread.currentThread().getName());
+            System.out.printf("%18s >> %s%n",
+                    Thread.currentThread().getName(), new FileNotFoundException(file.getPath()));
+            System.out.printf("%18s >> New file name = ", Thread.currentThread().getName());
             if (!kb.hasNextLine()) {
                 throw new IllegalArgumentException("No configuration file supplied");
             }

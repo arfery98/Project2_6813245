@@ -1,7 +1,6 @@
 // 6813110 Pattavee Nimkulrat
 // 6813113 Rachata Charoenboophon
 // 6813245 Thanaporn Songthong
-// 6813246 Premprecha Pliensuwan
 // 6813257 Sarochphan Nikrothanonda
 package Project2_6813245;
 
@@ -34,9 +33,15 @@ public class AssessorThread extends Thread {
         this.phases = phases;
     }
 
-    // Main reads these only after join(), which makes completed worker writes visible.
-    public long getSuccessfulPayments() { return successfulPayments; }
-    public long getPendingPayments() { return pendingPayments; }
+    // Main reads these only after join(), which makes completed worker writes
+    // visible.
+    public long getSuccessfulPayments() {
+        return successfulPayments;
+    }
+
+    public long getPendingPayments() {
+        return pendingPayments;
+    }
 
     @Override
     public void run() {
@@ -50,18 +55,18 @@ public class AssessorThread extends Thread {
                     int approved = available == 0 ? 0
                             : (int) ThreadLocalRandom.current().nextLong(1, (long) available + 1);
                     pendingPayments += gateway.removeClaims(approved);
-                    log("approve " + approved + " claims from " + gateway.getName()
-                            + "; pending claims = " + gateway.getPendingClaims());
+                    log(String.format("approve %3d claims from %-18s  %-18s pending claims = %4d",
+                            approved, gateway.getName(), gateway.getName(), gateway.getPendingClaims()));
                 }
-                log("pending payments = " + pendingPayments);
+                log(String.format("pending payments = %4d", pendingPayments));
                 if (pendingPayments > 0) {
                     PaymentGateway payment = payments.get(ThreadLocalRandom.current().nextInt(payments.size()));
                     synchronized (payment) {
                         int paid = payment.issuePayments(pendingPayments);
                         pendingPayments -= paid;
                         successfulPayments += paid;
-                        log("issue " + paid + " payments to " + payment.getName()
-                                + "; tokens = " + payment.getRemainingTokens());
+                        log(String.format("issue %3d payments to %-18s  %-18s tokens = %4d",
+                                paid, payment.getName(), payment.getName(), payment.getRemainingTokens()));
                     }
                 }
                 phases.await(); // Every assessor must arrive, including those with no work.
@@ -74,6 +79,6 @@ public class AssessorThread extends Thread {
     }
 
     private void log(String message) {
-        System.out.printf("%s >> %s%n", Thread.currentThread().getName(), message);
+        System.out.printf("%18s >> %s%n", Thread.currentThread().getName(), message);
     }
 }

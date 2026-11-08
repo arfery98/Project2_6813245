@@ -1,7 +1,6 @@
 // 6813110 Pattavee Nimkulrat
 // 6813113 Rachata Charoenboophon
 // 6813245 Thanaporn Songthong
-// 6813246 Premprecha Pliensuwan
 // 6813257 Sarochphan Nikrothanonda
 package Project2_6813245;
 
@@ -67,14 +66,14 @@ public class BrokerThread extends Thread {
                     batches.add(batch);
                     remaining -= batch;
                 }
-                System.out.printf("%s >> Day %d new claims = %d; split to %s%n",
-                        threadName, day, newClaims, batches);
+                System.out.printf("%18s >> new claims = %3d     split to %s%n",
+                        threadName, newClaims, batches);
                 ClaimGateway gateway = claimGateways.get(ThreadLocalRandom.current().nextInt(claimGateways.size()));
                 for (int batchClaims : batches) {
                     synchronized (gateway) {
                         int pending = gateway.addClaims(batchClaims);
-                        System.out.printf("%s >> submit %d claims to %s; pending claims = %d%n",
-                                threadName, batchClaims, gateway.getName(), pending);
+                        System.out.printf("%18s >> submit %3d claims to %-18s  %-18s pending claims = %4d%n",
+                                threadName, batchClaims, gateway.getName(), gateway.getName(), pending);
                     }
                 }
                 phaseBarrier.await(); // All brokers finished; assessors may work.
@@ -88,4 +87,3 @@ public class BrokerThread extends Thread {
         }
     }
 }
-
